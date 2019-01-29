@@ -20,7 +20,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView {
     override fun tableCleared() {
         hideBtnNewPosts()
         adapter?.items = mutableListOf()
-        adapter?.notifyDataSetChanged()
+//        adapter?.notifyDataSetChanged()
         swipeRefreshLayout.isRefreshing = false
     }
 
@@ -28,11 +28,10 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView {
     var adapter: PostResyclerAdapter? = null
 
     var observer: Observer<PagedList<ObjPost>>? = null
-    var postsToBeAdded = ArrayList<ObjPost>()
 
     override fun loadInitialData(posts: List<ObjPost>) {
 
-        adapter = PostResyclerAdapter(this, recyclerView, posts.toMutableList())
+        adapter = PostResyclerAdapter(this, recyclerView, ArrayList())
         adapter!!.setOnLoadMoreListener(object : PostResyclerAdapter.IOnLoadMore {
             override fun onLoadMore() {
                 if (!adapter!!.isLoading) {
@@ -44,6 +43,7 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView {
 
         recyclerView.adapter = adapter
 
+        adapter?.items = posts.toMutableList()
         swipeRefreshLayout.isRefreshing = false
 
     }
@@ -60,8 +60,10 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView {
 
     override fun loadMoreData(posts: List<ObjPost>) {
         adapter?.removeLoadingItem()
-        adapter?.items?.addAll(posts)
-        adapter?.notifyItemRangeInserted(adapter!!.itemCount - posts.size, posts.size)
+        val newList = ArrayList(adapter?.items!!.toMutableList())
+        newList.addAll(posts)
+        adapter?.items = newList
+//        adapter?.notifyItemRangeInserted(adapter!!.itemCount - posts.size, posts.size)
         swipeRefreshLayout.isRefreshing = false
     }
 
@@ -96,8 +98,9 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView {
 
         swipeRefreshLayout.setOnRefreshListener {
             hideBtnNewPosts()
-            adapter?.items?.clear()
-            adapter?.notifyItemRangeRemoved(0, adapter!!.items.size)
+            adapter?.items = ArrayList()
+//            adapter?.notifyItemRangeRemoved(0, adapter!!.items.size)
+//            adapter?.notifyDataSetChanged()
             presenter.getInitialData()
         }
 
@@ -115,8 +118,11 @@ class MainActivity : BaseActivity<MainPresenter>(), MainView {
     }
 
     override fun addMoreToTop(posts: List<ObjPost>) {
-        adapter?.items?.addAll(0, posts)
-        adapter?.notifyItemRangeInserted(0, posts.size)
+
+        val newList = ArrayList(adapter?.items!!.toMutableList())
+        newList.addAll(0, posts)
+        adapter?.items = newList
+//        adapter?.notifyItemRangeInserted(0, posts.size)
 //            postsToBeAdded.clear()
         recyclerView.scrollToPosition(0)
     }

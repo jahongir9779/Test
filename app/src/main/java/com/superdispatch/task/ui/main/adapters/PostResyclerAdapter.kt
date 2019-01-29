@@ -10,14 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.superdispatch.task.R
 import com.superdispatch.task.models.ObjPost
 import com.superdispatch.task.ui.viewgroups.PostViewHolder
+import kotlin.properties.Delegates
 
 
 /**
  * Created by MJay on 18-Jan-18.
  */
 
-class PostResyclerAdapter(var context: Context, var mRecyclerView: RecyclerView, var items: MutableList<ObjPost?>) :
-    RVAdrMutableNullable<ObjPost?, RecyclerView.ViewHolder>(items) {
+class PostResyclerAdapter(var context: Context, var mRecyclerView: RecyclerView, items: MutableList<ObjPost?>) :
+    RVAdrMutableNullable<ObjPost?, RecyclerView.ViewHolder>(items), AutoUpdatableAdapter {
 
     var isLoading: Boolean = false
 
@@ -27,6 +28,11 @@ class PostResyclerAdapter(var context: Context, var mRecyclerView: RecyclerView,
     private var mIOnLoadMore: IOnLoadMore? = null
     private val VIEW_TYPE_ITEM = 0
     private val VIEW_TYPE_LOADING = 1
+
+    var items: MutableList<ObjPost?> by Delegates.observable(arrayListOf()) { prop, old, new ->
+        autoNotify(old, new) { o, n -> o == n }
+    }
+
 
     init {
         val linearLayoutManager = mRecyclerView.layoutManager as LinearLayoutManager
@@ -56,7 +62,7 @@ class PostResyclerAdapter(var context: Context, var mRecyclerView: RecyclerView,
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if (items[position] != null){
+        return if (items[position] != null) {
             VIEW_TYPE_ITEM
         } else {
             VIEW_TYPE_LOADING
@@ -74,7 +80,7 @@ class PostResyclerAdapter(var context: Context, var mRecyclerView: RecyclerView,
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is PostViewHolder) {
-            holder.bind(items[position]!!)
+            holder.bind(items[position]!! as ObjPost)
         } else if (holder is LoadingViewHolder) {
             holder.progressBar1.isIndeterminate = true
         }
@@ -84,34 +90,30 @@ class PostResyclerAdapter(var context: Context, var mRecyclerView: RecyclerView,
         return if (items == null) 0 else items.size
     }
 
-    fun notifyRemoveEach() {
-        for (i in items.indices) {
-            notifyItemRemoved(i)
-        }
-    }
-
-    fun notifyAddEach() {
-        for (i in items.indices) {
-            notifyItemInserted(i)
-        }
-    }
-
     fun removeLoadingItem() {
         isLoading = false
         if (items.size == 0) return
-        items.removeAt(items.size - 1)
+
+        val newList = ArrayList(items.toMutableList())
+        newList.removeAt(items.size - 1)
+        items = newList
+//        items.removeAt(items.size - 1)
 //        notifyItemRemoved(items.size - 1)
-        notifyDataSetChanged()
+//        notifyDataSetChanged()
 
     }
 
     fun addLoadingItem() {
         isLoading = true
-        items.add(null)
+
+        val newList = ArrayList(items.toMutableList())
+        newList.add(null)
+        items = newList
+//        items.add(null)
 
 //        mRecyclerView.post { notifyItemInserted(items.size - 1) }
 //        notifyItemInserted(items.size - 1)
-        notifyDataSetChanged()
+//        notifyDataSetChanged()
     }
 
 

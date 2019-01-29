@@ -15,6 +15,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import org.jetbrains.anko.defaultSharedPreferences
 import org.joda.time.DateTime
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -43,6 +44,12 @@ class MainPresenter(mainView: MainView) : BasePresenter<MainView>(mainView) {
 
     override fun onViewCreated() {
         simulateError()
+
+        if (view.getCurrentContext().defaultSharedPreferences.getBoolean("isFirstTime", true)) {
+            view.getCurrentContext().defaultSharedPreferences.edit().putBoolean("isFirstTime", false).apply()
+            populateDb()
+        }
+
 //        clearDb()
 //        populateDb()
         startAddingPostsEachSecond()
@@ -82,6 +89,7 @@ class MainPresenter(mainView: MainView) : BasePresenter<MainView>(mainView) {
 
 
     fun clearDb() {
+        lastItemIndex = 0
 
         disposables += Completable.fromAction { db.clearTable() }
             .subscribeOn(Schedulers.io())
@@ -155,7 +163,7 @@ class MainPresenter(mainView: MainView) : BasePresenter<MainView>(mainView) {
                 setupObserver()
                 view.addMoreToTop(posts)
                 if (posts.isNullOrEmpty()) return@subscribe
-                lastItemIndex = posts[posts.size - 1].id
+//                lastItemIndex = posts[posts.size - 1].id
                 Log.d("DB ACTION ", "GET ALL " + posts.size)
             }, { throwable ->
                 view.showError("")
@@ -165,9 +173,11 @@ class MainPresenter(mainView: MainView) : BasePresenter<MainView>(mainView) {
     }
 
     var observer: Observer<PagedList<ObjPost>>? = null
+    var postsToBeAdded = ArrayList<ObjPost>()
 
     fun setupObserver() {
         observer = Observer { posts ->
+
             view.liveDataChanged(posts)
         }
         postsLiveData?.observe(view.getCurrentContext() as MainActivity, observer!!)

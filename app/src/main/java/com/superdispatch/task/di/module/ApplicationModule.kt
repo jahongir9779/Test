@@ -41,11 +41,10 @@ class ApplicationModule(private val baseApp: BaseApplication) {
     @Provides
     @Singleton
     fun providePostRoomDatabase(): PostRoomDatabase {
-        return PostRoomDatabase.getInstance(baseApp)
+//        return PostRoomDatabase.getInstance(baseApp)
 
-//        return Room.databaseBuilder(baseApp, PostRoomDatabase::class.java, "Posts.db")
-//            .allowMainThreadQueries()
-            // prepopulate the database after onCreate was called
+        return Room.databaseBuilder(baseApp, PostRoomDatabase::class.java, "Posts.db")
+//             prepopulate the database after onCreate was called
 //            .addCallback(object : RoomDatabase.Callback() {
 //                override fun onCreate(db: SupportSQLiteDatabase) {
 //                    // insert the data on the IO Thread
@@ -55,7 +54,7 @@ class ApplicationModule(private val baseApp: BaseApplication) {
 ////                    }
 //                }
 //            })
-//            .build()
+            .build()
     }
 
 
