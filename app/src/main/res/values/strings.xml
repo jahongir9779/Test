@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Task</string>
+  <string name="ooops_something_is_wrong_please_try_again">“Ooops, something is wrong. \nPlease, try again</string>
+  <string name="reload">Reload</string>
+</resources>
